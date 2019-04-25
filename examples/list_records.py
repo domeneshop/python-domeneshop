@@ -14,8 +14,4 @@ if __name__ == "__main__":
     print("DNS records for {0}:".format(domain["domain"]))
 
     for record in client.get_records(domain["id"]):
-        print(
-            "{} {} {} {}".format(
-                record["id"], record["host"], record["type"], record["data"]
-            )
-        )
+        print(record["id"], record["host"], record["type"], record["data"])
