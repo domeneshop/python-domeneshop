@@ -39,11 +39,11 @@ Listing DNS records for the first domain in your account:
         for record in client.get_records(domain["id"]):
             print(record["id"], record["host"], record["type"], record["data"])
 
-More examples can be found in the `examples folder <examples/>`_.
+More examples can be found in the `examples <examples/>`_ folder.
 
 Documentation
 -------------
 
 Coming soon.
 
-In the meantime, see the docstrings for `Client <src/domeneshop/client.py>`_.
+In the meantime, see the docstrings for `domeneshop.client.Client <src/domeneshop/client.py>`_.
