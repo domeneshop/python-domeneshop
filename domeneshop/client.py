@@ -4,12 +4,10 @@ import json
 import logging
 from typing import List
 
-import requests
-from requests.auth import HTTPBasicAuth
+import urllib3
+import base64
 
 logger = logging.getLogger(__name__)
-
-API_BASE = "https://api.domeneshop.no/v0"
 
 VALID_TYPES = [
     "A",
@@ -49,8 +47,19 @@ class Client:
 
         """
 
-        #: Doc comment for instance attribute qux.
-        self._token = HTTPBasicAuth(token, secret)
+        self._headers = {
+            "Authorization": "Basic {}".format(
+                base64.b64encode("{}:{}".format(token, secret).encode()).decode()
+            ),
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": "domeneshop-python/0.4.0",
+        }
+        self._http = urllib3.HTTPSConnectionPool(
+            "api.domeneshop.no", 443, maxsize=5, block=True, headers=self._headers
+        )
+
+    # Domains
 
     def get_domains(self) -> List[dict]:
         """
@@ -60,7 +69,7 @@ class Client:
 
         """
         resp = self._request("GET", "/domains")
-        domains = resp.json()
+        domains = json.loads(resp.data)
         return domains
 
     def get_domain(self, domain_id: int) -> dict:
@@ -73,8 +82,10 @@ class Client:
         """
 
         resp = self._request("GET", "/domains/{0}".format(domain_id))
-        domain = resp.json()
+        domain = json.loads(resp.data)
         return domain
+
+    # DNS records
 
     def get_records(self, domain_id: int) -> List[dict]:
         """
@@ -85,7 +96,7 @@ class Client:
         :return: A list of record dictionaries
         """
         resp = self._request("GET", "/domains/{0}/dns".format(domain_id))
-        records = resp.json()
+        records = json.loads(resp.data)
         return records
 
     def get_record(self, domain_id: int, record_id: int) -> dict:
@@ -98,7 +109,7 @@ class Client:
         :return: A record dictionary
         """
         resp = self._request("GET", "/domains/{0}/dns/{1}".format(domain_id, record_id))
-        record = resp.json()
+        record = json.loads(resp.data)
         return record
 
     def create_record(self, domain_id: int, record: int) -> int:
@@ -147,30 +158,94 @@ class Client:
         """
         self._request("DELETE", "/domains/{0}/dns/{1}".format(domain_id, record_id))
 
-    def _request(self, method="GET", endpoint="/", data=None, params=None):
-        if not data:
-            data = {}
-        if not params:
-            params = {}
+    # Forwards
 
-        headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    def get_forwards(self, domain_id: int) -> List[dict]:
+        """
+        Retrieve forwardings for a domain, or raises an error.
+        
+        :param domain_id: The domain ID to operate on
 
-        resp = requests.request(
-            method,
-            API_BASE + endpoint,
-            data=json.dumps(data),
-            params=params,
-            headers=headers,
-            auth=self._token,
+        :return: A list of forwarding dictionaries
+        """
+        resp = self._request("GET", "/domains/{0}/forwards".format(domain_id))
+        records = json.loads(resp.data)
+        return records
+
+    def get_forward(self, domain_id: int, host: str) -> List[dict]:
+        """
+        Retrieve forwardings for a domain, or raises an error.
+        
+        :param domain_id: The domain ID to operate on
+
+        :return: A list of forwarding dictionaries
+        """
+        resp = self._request("GET", "/domains/{0}/forwards/{1}".format(domain_id, host))
+        records = json.loads(resp.data)
+        return records
+
+    def create_forward(
+        self, domain_id: int, host: str, target: str, frame=False
+    ) -> None:
+        """
+        Create a forwarding for a domain, or raises an error.
+        
+        :param domain_id:  The domain ID to operate on
+        :param host:  The host (subdomain) to modify
+        :param forward: A dict
+
+        :return: A list of record dictionaries
+
+        """
+
+        forward = {"frame": frame, "host": host, "url": target}
+
+        print(forward)
+
+        self._request(
+            "POST", "/domains/{0}/forwards".format(domain_id, host), data=forward
         )
+
+    def modify_forward(
+        self, domain_id: int, host: str, target: str, frame=False
+    ) -> None:
+        """
+        Modify a forwarding for a domain, or raises an error.
+        
+        :param domain_id:  The domain ID to operate on
+        :param host:  The host (subdomain) to modify
+        :param forward: A dict
+        """
+
+        forward = {"frame": frame, "host": host, "url": target}
+
+        self._request(
+            "PUT", "/domains/{0}/forwards/{1}".format(domain_id, host), data=forward
+        )
+
+    def delete_forward(self, domain_id: int, host: str) -> None:
+        """
+        Deletes a forwarding for a domain, or raises an error.
+        
+        :param domain_id:  The domain ID to operate on
+        :param host:  The host (subdomain) to delete
+        """
+
+        self._request("DELETE", "/domains/{0}/forwards/{1}".format(domain_id, host))
+
+    def _request(self, method="GET", endpoint="/", data=None):
+        if data is not None:
+            data = json.dumps(data).encode("utf-8")
         try:
-            resp.raise_for_status()
-        except requests.exceptions.HTTPError:
-            try:
-                data = resp.json()
-            except json.JSONDecodeError:
-                data = {"error": resp.status_code, "help": "A server error occurred."}
-            raise DomeneshopError(resp.status_code, data) from None
+            resp = self._http.request(method, "/v0" + endpoint, body=data)
+            if resp.status >= 400:
+                try:
+                    data = json.loads(resp.data)
+                except json.JSONDecodeError:
+                    data = {"error": resp.status, "help": "A server error occurred."}
+                raise DomeneshopError(resp.status, data) from None
+        except urllib3.exceptions.HTTPError as e:
+            raise e
         else:
             return resp
 
@@ -196,7 +271,7 @@ class DomeneshopError(Exception):
         super().__init__(error_message)
 
 
-def _validate_record(record):
+def _validate_record(record: dict):
     record_keys = set(record.keys())
     record_type = record.get("type")
 

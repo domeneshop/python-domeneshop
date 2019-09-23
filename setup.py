@@ -1,15 +1,7 @@
-import os
-import sys
-
 from setuptools import find_packages, setup
 
-BASE_DIR = os.path.dirname(__file__)
-SRC_DIR = os.path.join(BASE_DIR, "src")
-sys.path.insert(0, SRC_DIR)
 
-from domeneshop import __version__  # pylint: disable=wrong-import-position
-
-INSTALL_REQUIRES = ["requests>=2.21.0"]
+INSTALL_REQUIRES = ["urllib3[secure]"]
 
 DEV_EXTRAS = ["black", "mypy", "prospector", "wheel"]
 
@@ -18,7 +10,7 @@ with open("README.rst", "rb") as f:
 
 setup(
     name="domeneshop",
-    version=__version__,
+    version="0.4.0",
     description="Domeneshop API library",
     author="Domeneshop AS",
     url="https://github.com/domeneshop/python-domeneshop",
@@ -42,8 +34,7 @@ setup(
         "Topic :: Utilities",
     ],
     author_email="kundeservice@domeneshop.no",
-    package_dir={"": "src"},
-    packages=find_packages(where="src"),
+    packages=find_packages(),
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
     extras_require={"dev": DEV_EXTRAS},
