@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 
-INSTALL_REQUIRES = ["urllib3[secure]"]
+INSTALL_REQUIRES = ["urllib3[secure]", "certifi"]
 
 DEV_EXTRAS = ["black", "mypy", "prospector", "wheel"]
 
@@ -10,7 +10,7 @@ with open("README.rst", "rb") as f:
 
 setup(
     name="domeneshop",
-    version="0.4.0",
+    version="0.4.1",
     description="Domeneshop API library",
     author="Domeneshop AS",
     url="https://github.com/domeneshop/python-domeneshop",
