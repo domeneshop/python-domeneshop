@@ -54,7 +54,7 @@ class Client:
             ),
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "User-Agent": "domeneshop-python/0.4.0",
+            "User-Agent": "domeneshop-python/0.4.2",
         }
         self._http = urllib3.HTTPSConnectionPool(
             "api.domeneshop.no", 443, maxsize=5, block=True, headers=self._headers, cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()

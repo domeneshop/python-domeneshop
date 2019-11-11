@@ -10,7 +10,7 @@ with open("README.rst", "rb") as f:
 
 setup(
     name="domeneshop",
-    version="0.4.1",
+    version="0.4.2",
     description="Domeneshop API library",
     author="Domeneshop AS",
     url="https://github.com/domeneshop/python-domeneshop",
