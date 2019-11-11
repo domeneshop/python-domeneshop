@@ -70,7 +70,7 @@ class Client:
 
         """
         resp = self._request("GET", "/domains")
-        domains = json.loads(resp.data)
+        domains = json.loads(resp.data.decode('utf-8'))
         return domains
 
     def get_domain(self, domain_id: int) -> dict:
@@ -83,7 +83,7 @@ class Client:
         """
 
         resp = self._request("GET", "/domains/{0}".format(domain_id))
-        domain = json.loads(resp.data)
+        domain = json.loads(resp.data.decode('utf-8'))
         return domain
 
     # DNS records
@@ -97,7 +97,7 @@ class Client:
         :return: A list of record dictionaries
         """
         resp = self._request("GET", "/domains/{0}/dns".format(domain_id))
-        records = json.loads(resp.data)
+        records = json.loads(resp.data.decode('utf-8'))
         return records
 
     def get_record(self, domain_id: int, record_id: int) -> dict:
@@ -110,7 +110,7 @@ class Client:
         :return: A record dictionary
         """
         resp = self._request("GET", "/domains/{0}/dns/{1}".format(domain_id, record_id))
-        record = json.loads(resp.data)
+        record = json.loads(resp.data.decode('utf-8'))
         return record
 
     def create_record(self, domain_id: int, record: int) -> int:
@@ -170,7 +170,7 @@ class Client:
         :return: A list of forwarding dictionaries
         """
         resp = self._request("GET", "/domains/{0}/forwards".format(domain_id))
-        records = json.loads(resp.data)
+        records = json.loads(resp.data.decode('utf-8'))
         return records
 
     def get_forward(self, domain_id: int, host: str) -> List[dict]:
@@ -182,7 +182,7 @@ class Client:
         :return: A list of forwarding dictionaries
         """
         resp = self._request("GET", "/domains/{0}/forwards/{1}".format(domain_id, host))
-        records = json.loads(resp.data)
+        records = json.loads(resp.data.decode('utf-8'))
         return records
 
     def create_forward(
@@ -241,7 +241,7 @@ class Client:
             resp = self._http.request(method, "/v0" + endpoint, body=data)
             if resp.status >= 400:
                 try:
-                    data = json.loads(resp.data)
+                    data = json.loads(resp.data.decode('utf-8'))
                 except json.JSONDecodeError:
                     data = {"error": resp.status, "help": "A server error occurred."}
                 raise DomeneshopError(resp.status, data) from None
