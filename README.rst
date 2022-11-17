@@ -15,7 +15,7 @@ Installation
 Credentials
 -----------
 
-Use of this plugin requires a Domeneshop API credentials.
+Use of this plugin requires Domeneshop API credentials.
 
 See the `Domeneshop API <https://api.domeneshop.no/docs>`_ documentation for more information.
 
