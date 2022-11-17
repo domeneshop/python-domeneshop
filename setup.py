@@ -10,7 +10,7 @@ with open("README.rst", "rb") as f:
 
 setup(
     name="domeneshop",
-    version="0.4.2",
+    version="0.4.3",
     description="Domeneshop API library",
     author="Domeneshop AS",
     url="https://github.com/domeneshop/python-domeneshop",
@@ -26,6 +26,10 @@ setup(
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Security",
         "Topic :: System :: Installation/Setup",
