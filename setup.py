@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 
-INSTALL_REQUIRES = ["urllib3[secure]", "certifi"]
+INSTALL_REQUIRES = ["urllib3", "certifi"]
 
 DEV_EXTRAS = ["black", "mypy", "prospector", "wheel"]
 
