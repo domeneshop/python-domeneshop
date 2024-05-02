@@ -1,12 +1,12 @@
 """Domeneshop API client implementation."""
 
+import base64
 import json
 import logging
 from typing import List
 
-import urllib3
 import certifi
-import base64
+import urllib3
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,13 @@ class Client:
             "User-Agent": "domeneshop-python/0.4.3",
         }
         self._http = urllib3.HTTPSConnectionPool(
-            "api.domeneshop.no", 443, maxsize=5, block=True, headers=self._headers, cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()
+            "api.domeneshop.no",
+            443,
+            maxsize=5,
+            block=True,
+            headers=self._headers,
+            cert_reqs="CERT_REQUIRED",
+            ca_certs=certifi.where(),
         )
 
     # Domains
@@ -70,20 +76,20 @@ class Client:
 
         """
         resp = self._request("GET", "/domains")
-        domains = json.loads(resp.data.decode('utf-8'))
+        domains = json.loads(resp.data.decode("utf-8"))
         return domains
 
     def get_domain(self, domain_id: int) -> dict:
         """
         Retrieve a domain.
-        
+
         :param domain_id: The domain ID to retrieve
 
         :return: A domain dictionary
         """
 
         resp = self._request("GET", "/domains/{0}".format(domain_id))
-        domain = json.loads(resp.data.decode('utf-8'))
+        domain = json.loads(resp.data.decode("utf-8"))
         return domain
 
     # DNS records
@@ -91,33 +97,33 @@ class Client:
     def get_records(self, domain_id: int) -> List[dict]:
         """
         Retrieve DNS records for a domain, or raises an error.
-        
+
         :param domain_id: The domain ID to operate on
 
         :return: A list of record dictionaries
         """
         resp = self._request("GET", "/domains/{0}/dns".format(domain_id))
-        records = json.loads(resp.data.decode('utf-8'))
+        records = json.loads(resp.data.decode("utf-8"))
         return records
 
     def get_record(self, domain_id: int, record_id: int) -> dict:
         """
         Retrieve a specific DNS record for a domain, or raises an error.
-        
+
         :param domain_id: The domain ID to operate on
         :param record_id: The DNS record ID to retrieve
 
         :return: A record dictionary
         """
         resp = self._request("GET", "/domains/{0}/dns/{1}".format(domain_id, record_id))
-        record = json.loads(resp.data.decode('utf-8'))
+        record = json.loads(resp.data.decode("utf-8"))
         return record
 
-    def create_record(self, domain_id: int, record: int) -> int:
+    def create_record(self, domain_id: int, record: dict) -> int:
         """
         Create a DNS record for a domain, or raises an error. The record is validated
         primitively before being passed on to the API.
-        
+
         :param domain_id: The domain ID to operate on
         :param record: A dict
 
@@ -129,14 +135,15 @@ class Client:
         _validate_record(record)
         resp = self._request("POST", "/domains/{0}/dns".format(domain_id), data=record)
 
-        record_id = resp.headers.get("location").split("/")[-1]
+        record_id = resp.headers.get("location").split("/")[-1]  # type: ignore
+
         return int(record_id)
 
     def modify_record(self, domain_id: int, record_id: int, record: dict) -> None:
         """
         Modify a DNS record for a domain, or raises an error. The record is validated
         primitively before being passed on to the API.
-        
+
         :param domain_id:  The domain ID to operate on
         :param record: A dict
 
@@ -153,7 +160,7 @@ class Client:
     def delete_record(self, domain_id: int, record_id: int) -> None:
         """
         Delete a DNS record for a domain, or raises an error.
-        
+
         :param domain_id:  The domain ID to operate on
         :param record_id: The record ID to delete
         """
@@ -164,25 +171,25 @@ class Client:
     def get_forwards(self, domain_id: int) -> List[dict]:
         """
         Retrieve forwardings for a domain, or raises an error.
-        
+
         :param domain_id: The domain ID to operate on
 
         :return: A list of forwarding dictionaries
         """
         resp = self._request("GET", "/domains/{0}/forwards".format(domain_id))
-        records = json.loads(resp.data.decode('utf-8'))
+        records = json.loads(resp.data.decode("utf-8"))
         return records
 
     def get_forward(self, domain_id: int, host: str) -> List[dict]:
         """
         Retrieve forwardings for a domain, or raises an error.
-        
+
         :param domain_id: The domain ID to operate on
 
         :return: A list of forwarding dictionaries
         """
         resp = self._request("GET", "/domains/{0}/forwards/{1}".format(domain_id, host))
-        records = json.loads(resp.data.decode('utf-8'))
+        records = json.loads(resp.data.decode("utf-8"))
         return records
 
     def create_forward(
@@ -190,7 +197,7 @@ class Client:
     ) -> None:
         """
         Create a forwarding for a domain, or raises an error.
-        
+
         :param domain_id:  The domain ID to operate on
         :param host:  The host (subdomain) to modify
         :param forward: A dict
@@ -201,18 +208,14 @@ class Client:
 
         forward = {"frame": frame, "host": host, "url": target}
 
-        print(forward)
-
-        self._request(
-            "POST", "/domains/{0}/forwards".format(domain_id, host), data=forward
-        )
+        self._request("POST", "/domains/{0}/forwards".format(domain_id), data=forward)
 
     def modify_forward(
         self, domain_id: int, host: str, target: str, frame=False
     ) -> None:
         """
         Modify a forwarding for a domain, or raises an error.
-        
+
         :param domain_id:  The domain ID to operate on
         :param host:  The host (subdomain) to modify
         :param forward: A dict
@@ -227,7 +230,7 @@ class Client:
     def delete_forward(self, domain_id: int, host: str) -> None:
         """
         Deletes a forwarding for a domain, or raises an error.
-        
+
         :param domain_id:  The domain ID to operate on
         :param host:  The host (subdomain) to delete
         """
@@ -241,7 +244,7 @@ class Client:
             resp = self._http.request(method, "/v0" + endpoint, body=data)
             if resp.status >= 400:
                 try:
-                    data = json.loads(resp.data.decode('utf-8'))
+                    data = json.loads(resp.data.decode("utf-8"))
                 except json.JSONDecodeError:
                     data = {"error": resp.status, "help": "A server error occurred."}
                 raise DomeneshopError(resp.status, data) from None
@@ -276,7 +279,7 @@ def _validate_record(record: dict):
     record_keys = set(record.keys())
     record_type = record.get("type")
 
-    if record_type not in VALID_TYPES:
+    if not record_type or record_type not in VALID_TYPES:
         raise TypeError("Record has invalid type. Valid types: {0}".format(VALID_TYPES))
 
     required_keys = COMMON_KEYS | VALID_KEYS.get(record_type, set())
