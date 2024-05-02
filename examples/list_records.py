@@ -2,7 +2,6 @@
 
 from domeneshop import Client
 
-
 if __name__ == "__main__":
     client = Client("<token>", "<secret>")
 

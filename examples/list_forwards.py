@@ -2,7 +2,6 @@
 
 from domeneshop import Client
 
-
 if __name__ == "__main__":
     client = Client("<token>", "<secret>")
 
@@ -22,4 +21,3 @@ if __name__ == "__main__":
                         forward["host"], domain["domain"], forward["url"]
                     )
                 )
-
