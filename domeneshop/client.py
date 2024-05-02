@@ -54,7 +54,7 @@ class Client:
             ),
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "User-Agent": "domeneshop-python/0.4.3",
+            "User-Agent": "domeneshop-python/0.4.4",
         }
         self._http = urllib3.HTTPSConnectionPool(
             "api.domeneshop.no",
