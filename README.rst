@@ -44,4 +44,4 @@ More examples can be found in the `examples <examples/>`_ folder.
 Documentation
 -------------
 
-See the docstrings for `domeneshop.client.Client <src/domeneshop/client.py>`_.
+See the docstrings for `domeneshop.client.Client <domeneshop/client.py>`_.
